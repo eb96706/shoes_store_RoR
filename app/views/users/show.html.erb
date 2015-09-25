@@ -1,0 +1,83 @@
+<h1>Hi <%= @user.name %> !<a href="/sessions/<%= @user.id%>" data-method='delete'><button>Logout</button></a></h1>
+<a href="/shoes"><button>Go to All Shoes</button></a>
+
+<% if flash[:errors] %>
+	<% flash[:errors].each do |error| %>
+		<p><%= error %></p>
+	<% end %>
+<% end %>
+
+<form action='/shoes/create' method='post'>
+	<p>Name: <input type='text' name='shoe[name]'></p>
+	<p>Amount: <input type='number' name='shoe[amount]'></p>
+	<p><input type='submit' value='Sell'></p>
+	<input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+</form>
+
+<h2>Your products that are not yet sold:</h2>
+<table>
+	<thead>
+		<tr>
+			<th>Products</th>
+			<th>Date posted</th>
+			<th>Amount</th>
+			<th>Action</th>
+	    </tr>
+	</thead>
+	<tbody> 
+		<% @user.shoes.where(buyer: nil).each do |shoe| %>
+		<tr>
+			<td><%= shoe.name %></td>
+			<td><%= shoe.created_at.strftime("%B %e, %Y") %></td>
+			<td>$<%= shoe.amount %></td>		
+			<td><a href="/shoes/<%= shoe.id %>" data-method='delete'>Remove</a></td>
+		</tr>
+		<% end %>
+	</tbody>
+</table>
+<br>
+
+<h2>Sales</h2>
+<table>
+	<thead>
+		<tr>
+			<th>Product</th>
+			<th>Date Bought</th>
+			<th>Buyer</th>
+			<th>Amount</th>
+		</tr>
+	</thead>
+	<tbody>
+		<% @user.shoes.where.not(buyer: nil).each do |shoe| %>
+		<tr>
+			<td><%= shoe.name %></td>
+			<td><%= shoe.updated_at.strftime("%B %e, %Y") %></td>
+			<td><%= shoe.buyer.name %></td>
+			<td>$<%= shoe.amount %></td>
+		</tr>
+		<% end %>
+	</tbody>
+</table>
+<%=@user.shoes.where.not(buyer: nil).sum(:amount) %>
+<h2>Purchases</h2>
+<table>
+	<thead>
+		<tr>
+			<th>Product</th>
+			<th>Date bought</th>
+			<th>Seller</th>
+			<th>Amount</th>
+		</tr>
+	</thead>
+	<tbody>
+		<% @user.purchases.each do |purchase| %>
+		<tr>
+			<td><%= purchase.name %></td>
+			<td><%= purchase.updated_at.strftime("%B %e, %Y") %></td>			
+			<td><%= purchase.seller.name %></td>			
+			<td>$<%= purchase.amount %></td>			
+		</tr>
+		<% end %>
+	</tbody>
+</table>
+<%=@user.purchases.sum(:amount) %>
